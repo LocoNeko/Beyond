@@ -14,7 +14,7 @@ namespace Beyond
             Vector3 terrainlocalPosition = FPSController.transform.position - closestTerrain.transform.position;
             Vector2 normalisedPosition = new Vector2(Mathf.InverseLerp(0f, closestTerrain.terrainData.size.x, terrainlocalPosition.x)* closestTerrain.terrainData.size.x,
                                                     Mathf.InverseLerp(0f, closestTerrain.terrainData.size.z, terrainlocalPosition.z)* closestTerrain.terrainData.size.z);
-            Debug.Log("Closest terrain is " + closestTerrain.name + " position is : " + normalisedPosition);
+            //Debug.Log("Closest terrain is " + closestTerrain.name + " position is : " + normalisedPosition);
         }
 
         Terrain GetClosestCurrentTerrain(Vector3 playerPos)

@@ -134,7 +134,7 @@ GameObject:
   - component: {fileID: 405450990}
   - component: {fileID: 405450989}
   m_Layer: 0
-  m_Name: GameManager
+  m_Name: BeyondSceneManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -155,15 +155,15 @@ MonoBehaviour:
   loadingScreen: {fileID: 1334884138}
   progressBar: {fileID: 1334884140}
   loadingText: {fileID: 1334884139}
-  mainSceneAudioListener: {fileID: 738070675}
+  mainSceneAudioListener: {fileID: 0}
   tipsText: {fileID: 1334884147}
   alphaCanvas: {fileID: 1334884142}
   tips:
-  - short
-  - "For the sake of simplicity, we\u2019ll define a word as five characters (including
-    spaces and punctuation), and WPM = 200. Feel free to add additional parameters
-    to your calculation. Note that if all you\u2019re looking for is a broad estimation,
-    what we\u2019ve defined will suffice."
+  - Short tip
+  - DId you know that if a statue in the park of a person on a horse has both front
+    legs in the air, the person died in battle; if the horse has one front leg in
+    the air, the person died as a result of wounds received in battle; if the horse
+    has all four legs on the ground, the person died of natural causes.
   - quite short tip, but not that short
   tipCount: 0
 --- !u!4 &405450990
@@ -190,7 +190,6 @@ GameObject:
   m_Component:
   - component: {fileID: 738070677}
   - component: {fileID: 738070676}
-  - component: {fileID: 738070675}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -198,14 +197,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &738070675
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 738070674}
-  m_Enabled: 1
 --- !u!20 &738070676
 Camera:
   m_ObjectHideFlags: 0
@@ -271,28 +262,32 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 710378291825386721, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
-      propertyPath: m_fontColor.r
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 710378291825386721, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
-      propertyPath: m_fontColor.g
-      value: 0.105882354
+      propertyPath: m_text
+      value: TIPS HERE
       objectReference: {fileID: 0}
     - target: {fileID: 710378291825386721, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
       propertyPath: m_fontColor.b
       value: 0.6039216
       objectReference: {fileID: 0}
     - target: {fileID: 710378291825386721, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4288289536
+      propertyPath: m_fontColor.g
+      value: 0.105882354
       objectReference: {fileID: 0}
     - target: {fileID: 710378291825386721, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
-      propertyPath: m_text
-      value: TIPS HERE
+      propertyPath: m_fontColor.r
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 710378291825386721, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
+      propertyPath: m_fontColor32.rgba
+      value: 4288289536
       objectReference: {fileID: 0}
     - target: {fileID: 1724540389704383045, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
       propertyPath: m_Name
       value: TipsText
+      objectReference: {fileID: 0}
+    - target: {fileID: 1769784837355234852, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
+      propertyPath: m_RootOrder
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 1769784837355234852, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
       propertyPath: m_LocalPosition.x
@@ -307,6 +302,10 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 1769784837355234852, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1769784837355234852, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
       propertyPath: m_LocalRotation.x
       value: 0
       objectReference: {fileID: 0}
@@ -317,14 +316,6 @@ PrefabInstance:
     - target: {fileID: 1769784837355234852, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
       propertyPath: m_LocalRotation.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1769784837355234852, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
-      propertyPath: m_LocalRotation.w
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 1769784837355234852, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
-      propertyPath: m_RootOrder
-      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 1769784837355234852, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
       propertyPath: m_LocalEulerAnglesHint.x
@@ -339,16 +330,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5849495521890121488, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
-      propertyPath: m_fontColor.r
-      value: 0
+      propertyPath: m_fontColor.b
+      value: 0.6037736
       objectReference: {fileID: 0}
     - target: {fileID: 5849495521890121488, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
       propertyPath: m_fontColor.g
       value: 0.104749285
       objectReference: {fileID: 0}
     - target: {fileID: 5849495521890121488, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
-      propertyPath: m_fontColor.b
-      value: 0.6037736
+      propertyPath: m_fontColor.r
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 5849495521890121488, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
       propertyPath: m_fontColor32.rgba
@@ -363,16 +354,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7625692724858916351, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
-      propertyPath: m_Colors.m_NormalColor.r
-      value: 0
+      propertyPath: m_Colors.m_NormalColor.b
+      value: 0.7169812
       objectReference: {fileID: 0}
     - target: {fileID: 7625692724858916351, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
       propertyPath: m_Colors.m_NormalColor.g
       value: 0.08623424
       objectReference: {fileID: 0}
     - target: {fileID: 7625692724858916351, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
-      propertyPath: m_Colors.m_NormalColor.b
-      value: 0.7169812
+      propertyPath: m_Colors.m_NormalColor.r
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7773792849955396163, guid: 452bfa60a6874b4b08fb082419994bb0, type: 3}
       propertyPath: m_AnchorMax.y
@@ -446,7 +437,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1559481481
 MonoBehaviour:
   m_ObjectHideFlags: 0
