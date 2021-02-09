@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   version: 2.3.1
   lightSettings:
-    directionalLightMode: 0
+    directionalLightMode: 1
     LightColor:
       serializedVersion: 2
       key0: {r: 0.29803923, g: 0.33333334, b: 0.4392157, a: 1}
@@ -154,7 +154,7 @@ MonoBehaviour:
       m_PostInfinity: 2
       m_RotationOrder: 0
     directLightAngleOffset: 0
-    ambientMode: 3
+    ambientMode: 1
     ambientIntensity:
       serializedVersion: 2
       m_Curve:
@@ -1674,11 +1674,11 @@ MonoBehaviour:
     auroraSpeed: 0.005
   viewMode: 0
   viewModeLW: 0
-  showPlayerSetup: 1
+  showPlayerSetup: 0
   showRenderingSetup: 0
   showComponentsSetup: 0
   showTimeUI: 0
   showWeatherUI: 0
   showAudioUI: 0
   showEffectsUI: 0
-  modified: 0
+  modified: 1
