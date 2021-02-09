@@ -1,156 +1,86 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.UI;
 using TMPro;
+using MapMagic;
 
 namespace Beyond
 {
-    public enum SceneIndices
-    {
-        MANAGER = 0, // The scene with our game manager
-        MAIN = 1, // Main title / start screen
-        GAME = 2, // Main game scene
-        WORLD = 3 // World map scene
-    }
-
-    public enum AudibleObjects
-    {
-        BUTTON,
-        SCREEN
-    }
-
-    public enum AudibleEvents
-    {
-        UI_ENTER,
-        START
-    }
-
 
     public class GameManager : MonoBehaviour
     {
-        public static GameManager instance;
-        public GameObject loadingScreen;
-        public GameObject progressBar;
-        public TextMeshProUGUI loadingText;
-        public AudioListener mainSceneAudioListener;
-        
-        #region Tips 
-        [Header("Tips")]
+        private Place place;
+        [SerializeField] private MapMagic.Core.MapMagicObject mm;
+        [SerializeField] private GameObject FPSController;
+        [SerializeField] private TextMeshProUGUI textTime;
+        [SerializeField] private TextMeshProUGUI textDate;
+        public static GameManager instance ;
 
-        public TextMeshProUGUI tipsText;
-        public CanvasGroup alphaCanvas;
-        public string[] tips;
-        #endregion
+        private bool initialised;
 
-        public void Awake()
+        private void Awake()
         {
+            initialised = false;
             instance = this;
-            SceneManager.LoadSceneAsync((int)SceneIndices.MAIN, LoadSceneMode.Additive);
+            place = new Place();
         }
 
-        public void Start()
+        // Start is called before the first frame update
+        void Start()
         {
-            AudioManager.instance.PlayAudio(
-                this.gameObject, AudibleObjects.SCREEN, AudibleEvents.START
-            );
+            //mm.graph.random.Seed = (int)(System.DateTime.Now.Ticks % 1000000);
+            //mm.StartGenerate();
         }
 
-        List<AsyncOperation> scenesLoading = new List<AsyncOperation>();
-
-        public void StartGame()
+        void Update()
         {
-            loadingScreen.gameObject.SetActive(true);
-
-            StartCoroutine(GenerateTips());
-
-            scenesLoading.Add(SceneManager.UnloadSceneAsync((int)SceneIndices.MAIN));
-            scenesLoading.Add(SceneManager.LoadSceneAsync((int)SceneIndices.GAME, LoadSceneMode.Additive));
-
-            StartCoroutine(GetSceneLoadProgress());
-            StartCoroutine(GetTotalProgress());
+            if (!initialised)
+                Initialise();
+            place.update(Time.deltaTime);
+            textTime.text = place.gametime.TimeStr();
+            textDate.text = place.gametime.DateOnlyStr();
+            EnviroSky.instance.GameTime.Seconds =0;
+            EnviroSky.instance.GameTime.Minutes = place.gametime.getMinute();
+            EnviroSky.instance.GameTime.Hours = place.gametime.getHour();
+            EnviroSky.instance.GameTime.Days = place.gametime.DayInYear();
+            EnviroSky.instance.GameTime.Years = place.gametime.getYear()+2020;
+            /*
+            Debug.Log(
+                EnviroSky.instance.currentYear + "/" +
+                EnviroSky.instance.currentDay + "/" +
+                EnviroSky.instance.GetTimeStringWithSeconds());
+            */
         }
 
-        float totalSceneProgress;
-        float totalMapGenerationProgress;
-
-        public IEnumerator GetSceneLoadProgress()
+        void Initialise()
         {
-            for (int i=0; i<scenesLoading.Count; i++)
+            if (!initialised)
             {
-                while (!scenesLoading[i].isDone)
+                if (!mm.IsGenerating())
                 {
-                    totalSceneProgress = 0 ;
-
-                    foreach (AsyncOperation operation in scenesLoading)
-                    {
-                        totalSceneProgress += operation.progress ;
-                    }
-
-                    totalSceneProgress = (totalSceneProgress / (float)scenesLoading.Count);
-                    progressBar.GetComponent<Slider>().value = totalSceneProgress;
-                    //Debug.Log("totalSceneProgress="+totalSceneProgress);
-                    loadingText.text = string.Format("Loading Game Scenes: {0}%", (int)(totalSceneProgress*100));
-
-                    yield return null;
+                    FPSController.SetActive(false);
+                    Vector3 characterPosition = FPSController.transform.position;
+                    Vector3 castPosition = characterPosition;
+                    castPosition.y = 1000f;
+                    RaycastHit hit;
+                    int layerMask = 1 << 8; // Terrain layer
+                    Physics.Raycast(castPosition, Vector3.down, out hit, Mathf.Infinity, layerMask);
+                    characterPosition.y = hit.point.y + 2f;
+                    FPSController.transform.position = characterPosition;
+                    FPSController.SetActive(true);
+                    initialised = true;
                 }
             }
-
-        }
-        public IEnumerator GetTotalProgress()
-        {
-            float totalProgress = 0 ;
-
-            while (MapMagicManager.instance == null || MapMagicManager.instance.MapIsGenerating())
-            {
-                if (MapMagicManager.instance == null)
-                {
-                    totalMapGenerationProgress = 0;
-                }
-                else
-                {
-                    totalMapGenerationProgress = MapMagicManager.instance.GetLoadProgress();
-                }
-                totalProgress = (totalSceneProgress + totalMapGenerationProgress) / 2f;
-                //Debug.Log("totalSceneProgress= " + totalSceneProgress + ", totalMapGenerationProgress= "+totalMapGenerationProgress + " TOTAL="+totalProgress);
-                progressBar.GetComponent<Slider>().value = totalProgress;
-                loadingText.text = string.Format("Loading Terrain: {0}%", (int)(totalMapGenerationProgress*100));
-
-                yield return null;
-            }
-            mainSceneAudioListener.enabled = false;
-            loadingScreen.gameObject.SetActive(false);
         }
 
-        public int tipCount;
-        public IEnumerator GenerateTips()
+        public float GetLoadProgress()
         {
-            tipCount = Random.Range(0, tips.Length);
-            tipsText.text = tips[tipCount];
-            while (loadingScreen.activeInHierarchy)
-            {
-                float timeToRead = 0.5f + (float)tipsText.text.Length / 15f; // 15 characters per second
-                yield return new WaitForSeconds(timeToRead);
-                LeanTween.alphaCanvas(alphaCanvas, 0, 0.5f); // fade off
-                yield return new WaitForSeconds(0.5f);
-
-                if (++tipCount >= tips.Length)
-                    tipCount = 0;
-
-                tipsText.text = tips[tipCount];
-                LeanTween.alphaCanvas(alphaCanvas, 1, 0.5f); // fade in
-
-            }
-
+            return mm.GetProgress();
         }
 
-        public void Quit()
+        public bool MapIsGenerating()
         {
-            #if UNITY_EDITOR
-                UnityEditor.EditorApplication.isPlaying = false;
-            #endif
-            Application.Quit();
+            return mm.IsGenerating();
         }
     }
 }

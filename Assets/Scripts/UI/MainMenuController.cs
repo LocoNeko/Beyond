@@ -9,7 +9,7 @@ namespace Beyond
     public class MainMenuController : MonoBehaviour
     {
         public static MainMenuController instance;
-        GameManager gameManager;
+        BeyondSceneManager beyondSceneManager;
 
         #region Menu Panels
         [Header("Menus")]
@@ -30,7 +30,7 @@ namespace Beyond
         public void Awake()
         {
             instance = this;
-            gameManager = GameManager.instance;
+            beyondSceneManager = BeyondSceneManager.instance;
         }
         public void Start()
         {
@@ -60,12 +60,12 @@ namespace Beyond
 
         public void StartGame()
         {
-            gameManager.StartGame();
+            beyondSceneManager.StartGame();
         }
 
         public void QuitGame()
         {
-            gameManager.Quit();
+            beyondSceneManager.Quit();
         }
 
         public void SetMusicVolume(float SliderValue)

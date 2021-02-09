@@ -5,7 +5,16 @@ using UnityEngine.Audio;
 
 namespace Beyond
 {
-
+    public enum AudibleObjects
+    {
+        BUTTON,
+        SCREEN
+    }
+    public enum AudibleEvents
+    {
+        UI_ENTER,
+        START
+    }
     public class AudioManager : MonoBehaviour
     {
         public static AudioManager instance;
