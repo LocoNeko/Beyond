@@ -12,7 +12,7 @@ namespace Beyond
     {
         public static List<int> AllowedSpeeds = new List<int> { 0, 1, 2, 3, 4, 5 };
         private float timer = 0f;
-        private int speed = 2;
+        private int speed = 3;
         private int year = 0;
         private int month = 1;
         private int day = 1;
