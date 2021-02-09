@@ -155,7 +155,7 @@ MonoBehaviour:
   loadingScreen: {fileID: 1334884138}
   progressBar: {fileID: 1334884140}
   loadingText: {fileID: 1334884139}
-  mainSceneAudioListener: {fileID: 738070675}
+  mainSceneAudioListener: {fileID: 0}
   tipsText: {fileID: 1334884147}
   alphaCanvas: {fileID: 1334884142}
   tips:
@@ -190,7 +190,6 @@ GameObject:
   m_Component:
   - component: {fileID: 738070677}
   - component: {fileID: 738070676}
-  - component: {fileID: 738070675}
   m_Layer: 0
   m_Name: Camera
   m_TagString: Untagged
@@ -198,14 +197,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!81 &738070675
-AudioListener:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 738070674}
-  m_Enabled: 1
 --- !u!20 &738070676
 Camera:
   m_ObjectHideFlags: 0
@@ -446,7 +437,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &1559481481
 MonoBehaviour:
   m_ObjectHideFlags: 0

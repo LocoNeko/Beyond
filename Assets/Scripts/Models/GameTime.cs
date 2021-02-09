@@ -12,21 +12,22 @@ namespace Beyond
     {
         public static List<int> AllowedSpeeds = new List<int> { 0, 1, 2, 3, 4, 5 };
         private float timer = 0f;
-        private int speed = 1;
+        private int speed = 4;
         private int year = 0;
         private int month = 1;
         private int day = 1;
         private int hour = 0;
         private int minute = 0;
+        private int second = 0;
         private int dayOfTheWeek = 0;
         private static readonly Dictionary<int, float> SpeedFactor = new Dictionary<int, float>
         {
             {0,0f},
-            {1,1/60f}, //1 real time
-            {2,1f}, //1 second is 1 minute
-            {3,10f}, //1 second is 10 minute
-            {4,60f}, //1 second is 1 hour 
-            {5,1440f}, //1 second is 1 day
+            {1,1f}, //1 real time
+            {2,60f}, //1 second is 1 minute
+            {3,600f}, //1 second is 10 minute
+            {4,3600f}, //1 second is 1 hour 
+            {5,86400f}, //1 second is 1 day
         };
 
         private static readonly List<int> monthWith30Days = new List<int>() { 2, 4, 6, 9, 11 };
@@ -162,27 +163,33 @@ namespace Beyond
             if (timer > 1 / SpeedFactor[speed])
             {
                 //Debug.Log("Adding "+ Mathf.RoundToInt(SpeedFactor[speed] * timer) + " minutes");
-                minute += Mathf.RoundToInt(SpeedFactor[speed] * timer);
+                second += Mathf.RoundToInt(SpeedFactor[speed] * timer);
                 timer = 0;
-                if (minute >= 60)
+                if (second>=60)
                 {
-                    int hoursToAdd = minute / 60;
-                    minute = minute % 60;
-                    hour += hoursToAdd;
-                    if (hour >= 24)
+                    int minutesToAdd = second / 60;
+                    second = second % 60;
+                    minute += minutesToAdd;
+                    if (minute >= 60)
                     {
-                        hour = hour % 24;
-                        if (++dayOfTheWeek == 7)
+                        int hoursToAdd = minute / 60;
+                        minute = minute % 60;
+                        hour += hoursToAdd;
+                        if (hour >= 24)
                         {
-                            dayOfTheWeek = 0;
-                        }
-                        if (day++ == DaysInMonth(month))
-                        {
-                            day = 1;
-                            if (++month == 13)
+                            hour = hour % 24;
+                            if (++dayOfTheWeek == 7)
                             {
-                                month = 1;
-                                year++;
+                                dayOfTheWeek = 0;
+                            }
+                            if (day++ == DaysInMonth(month))
+                            {
+                                day = 1;
+                                if (++month == 13)
+                                {
+                                    month = 1;
+                                    year++;
+                                }
                             }
                         }
                     }
@@ -217,7 +224,7 @@ namespace Beyond
 
         public string TimeStr()
         {
-            return String.Format("{0:00}:{1:00}", hour, minute);
+            return String.Format("{0:00}:{1:00}:{2:00}", hour, minute, second);
         }
 
         public string DateStr()

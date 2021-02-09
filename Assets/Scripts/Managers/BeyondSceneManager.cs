@@ -21,7 +21,6 @@ namespace Beyond
         public GameObject loadingScreen;
         public GameObject progressBar;
         public TextMeshProUGUI loadingText;
-        public AudioListener mainSceneAudioListener;
         
         #region Tips 
         [Header("Tips")]
@@ -105,7 +104,6 @@ namespace Beyond
 
                 yield return null;
             }
-            mainSceneAudioListener.enabled = false;
             loadingScreen.gameObject.SetActive(false);
         }
 
