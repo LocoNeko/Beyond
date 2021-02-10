@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 using TMPro;
 using MapMagic;
 using UnityEngine.Audio;
@@ -17,6 +18,10 @@ namespace Beyond
         [SerializeField] private GameObject FPSController;
         [SerializeField] private TextMeshProUGUI textTime;
         [SerializeField] private TextMeshProUGUI textDate;
+        [SerializeField] private GameObject ImageCurrentWeather;
+
+        [SerializeField] private Sprite LightRain;
+
         public static GameManager instance ;
 
 
@@ -40,11 +45,15 @@ namespace Beyond
             {
                 DoOnWeatherChange(type);
             };
+
         }
 
         void DoOnWeatherChange(EnviroWeatherPreset type)
         {
             Debug.Log("Weather changed to "+type.name);
+            //TODO : Change icon based on the EnviroWeatherPreset returned
+            EnviroWeatherPreset.
+            ImageCurrentWeather.GetComponent<Image>().sprite = LightRain;
         }
 
         void Update()
@@ -52,6 +61,7 @@ namespace Beyond
             if (!initialised)
                 Initialise();
             timer += Time.deltaTime;
+            // Update every 1/10th of a second
             if(timer>0.1f)
             {
                 place.update(timer);
@@ -65,7 +75,6 @@ namespace Beyond
                 EnviroSky.instance.GameTime.Hours = place.gametime.getHour();
                 EnviroSky.instance.GameTime.Days = place.gametime.DayInYear();
                 EnviroSky.instance.GameTime.Years = place.gametime.getYear() + 2020;
-
             }
             /*
             Debug.Log(
