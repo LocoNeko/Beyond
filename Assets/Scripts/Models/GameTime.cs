@@ -12,7 +12,7 @@ namespace Beyond
     {
         public static List<int> AllowedSpeeds = new List<int> { 0, 1, 2, 3, 4, 5 };
         private float timer = 0f;
-        private int speed = 3;
+        private int speed = 1;
         private int year = 0;
         private int month = 1;
         private int day = 1;
@@ -129,7 +129,7 @@ namespace Beyond
             year = 13;
             month = 3;
             day = 1;
-            hour = 12;
+            hour = 21;
             minute = 34;
             dayOfTheWeek = 0; // Do we really want to always start on a Monday ?
         }
@@ -139,6 +139,7 @@ namespace Beyond
             if (AllowedSpeeds.Contains(i))
             {
                 speed = i;
+                Time.timeScale = SpeedFactor[i];
                 return true;
             }
             else
@@ -148,6 +149,11 @@ namespace Beyond
             return false;
         }
 
+        //TODO : refactor and use get set
+        public int getSpeed()
+        {
+            return speed;
+        }
 
         /// <summary>
         /// Adds time  based on the current speed. Will never add more than 1 day

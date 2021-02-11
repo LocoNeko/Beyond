@@ -20,7 +20,11 @@ namespace Beyond
         [SerializeField] private TextMeshProUGUI textDate;
         [SerializeField] private GameObject ImageCurrentWeather;
 
+        [SerializeField] private Sprite Sunny;
+        [SerializeField] private Sprite Cloudy;
+        [SerializeField] private Sprite Cloudy2;
         [SerializeField] private Sprite LightRain;
+        [SerializeField] private Sprite HeavyRain;
 
         public static GameManager instance ;
 
@@ -52,8 +56,24 @@ namespace Beyond
         {
             Debug.Log("Weather changed to "+type.name);
             //TODO : Change icon based on the EnviroWeatherPreset returned
-            EnviroWeatherPreset.
-            ImageCurrentWeather.GetComponent<Image>().sprite = LightRain;
+            switch (type.name)
+            {
+                case "Cloudy 1":
+                    ImageCurrentWeather.GetComponent<Image>().sprite = Cloudy;
+                    break;
+                case "Cloudy 2":
+                    ImageCurrentWeather.GetComponent<Image>().sprite = Cloudy2;
+                    break;
+                case "Light Rain":
+                    ImageCurrentWeather.GetComponent<Image>().sprite = LightRain;
+                    break;
+                case "Heavy Rain":
+                    ImageCurrentWeather.GetComponent<Image>().sprite = HeavyRain;
+                    break;
+                default:
+                    ImageCurrentWeather.GetComponent<Image>().sprite = Sunny;
+                    break;
+            }
         }
 
         void Update()
@@ -113,6 +133,18 @@ namespace Beyond
         public bool MapIsGenerating()
         {
             return mm.IsGenerating();
+        }
+
+        public void PauseGame()
+        {
+            if (place.gametime.getSpeed()==0)
+            {
+                place.gametime.setSpeed(1);
+            }
+            else
+            {
+                place.gametime.setSpeed(0);
+            }
         }
     }
 }
