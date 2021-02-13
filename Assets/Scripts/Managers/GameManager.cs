@@ -9,7 +9,6 @@ using UnityEngine.Audio;
 
 namespace Beyond
 {
-
     public class GameManager : MonoBehaviour
     {
         private Place place;
@@ -54,7 +53,7 @@ namespace Beyond
 
         void DoOnWeatherChange(EnviroWeatherPreset type)
         {
-            Debug.Log("Weather changed to "+type.name);
+            //Debug.Log("Weather changed to "+type.name);
             //TODO : Change icon based on the EnviroWeatherPreset returned
             switch (type.name)
             {
@@ -90,6 +89,7 @@ namespace Beyond
                 textTime.text = place.gametime.TimeStr();
                 textDate.text = place.gametime.DateOnlyStr();
 
+                // TO DO : Makes this more efficient (only to happen when GameTime changed, should be an event)
                 EnviroSky.instance.GameTime.Seconds = 0;
                 EnviroSky.instance.GameTime.Minutes = place.gametime.getMinute();
                 EnviroSky.instance.GameTime.Hours = place.gametime.getHour();
