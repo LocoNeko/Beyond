@@ -129,7 +129,7 @@ namespace Beyond
             year = 13;
             month = 3;
             day = 1;
-            hour = 21;
+            hour = 12;
             minute = 34;
             dayOfTheWeek = 0; // Do we really want to always start on a Monday ?
         }

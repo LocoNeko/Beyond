@@ -9,8 +9,8 @@ namespace Beyond
 
     public class UIButton : MonoBehaviour, IPointerEnterHandler, IPointerClickHandler
     {
-        [SerializeField] private List<string> prefixedBy;
-        [SerializeField] private string action;
+        [SerializeField] private List<GameAction> prefixedBy;
+        [SerializeField] private GameAction action;
 
 
         //Do this when the cursor enters the rect area of this selectable UI object.
@@ -22,15 +22,17 @@ namespace Beyond
 
         public void OnPointerClick(PointerEventData eventData)
         {
-            InputManager.instance.ActivateAction(action, prefixedBy, transform.gameObject);
+            if (InputManager.instance)
+                InputManager.instance.ActivateAction(action, prefixedBy, transform.gameObject);
         }
 
-        public void SetActions(List<string> prefix , string action)
+        // Set the action and its prefix on a Button
+        public void SetActions(List<GameAction> prefix , GameAction ga)
         {
             prefixedBy = prefix;
-            this.action = action;
+            this.action = ga;
             Image img = gameObject.transform.Find("ButtonImage").GetComponent<Image>();
-            img.sprite = Resources.Load<Sprite>("UI/" + action);
+            img.sprite = Resources.Load<Sprite>("UI/" + ga.Name);
         }
 
     }
