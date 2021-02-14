@@ -32,7 +32,12 @@ namespace Beyond
             }
             if (Input.GetKeyDown(KeyCode.B))
             {
-                ActivateAction(ActionController.instance.GetActionByName("Build"), new List<GameAction>());
+                ActivateAction(ActionController.instance.GetActionByName("CreateBlueprint"), new List<GameAction>());
+            }
+            //Left click
+            if (Input.GetMouseButtonDown(0))
+            {
+                BuildController.instance.TryPlacingBlueprint();
             }
         }
 
@@ -41,7 +46,7 @@ namespace Beyond
             List<GameAction> nextActions = ga.NextActions;
 
             // The prefix of all buttons in the group is the current prefix + the action of this button
-            //example : Clicking on "Build" from prefix "structure" generates prefix "Build","Structure"
+            //example : Clicking on "CreateBlueprint" from prefix "structure" generates prefix "CreateBlueprint","Structure"
             List<GameAction> newPrefix = new List<GameAction>();
             foreach (GameAction ga2 in prefix)
                 newPrefix.Add(ga2);
@@ -119,7 +124,7 @@ namespace Beyond
                 buttonGroup = ShowInstantiatedGroup(action , rootGO);
             }
 
-            // This is the first time we see this group, let's build it
+            // This is the first time we see this button group, let's build it
             else
             {
                 buttonGroup = InstantiateGroup(action, children, prefix);

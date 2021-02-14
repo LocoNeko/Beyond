@@ -31,10 +31,9 @@ namespace Beyond
             List<GameAction> categories = completeList.FindAll(a => a.ActionType == ActionType.Category);
             List<GameAction> materials = completeList.FindAll(a => a.ActionType == ActionType.Material);
 
-            if (verb.Name == "Build")
-                BuildManager.instance.Build(GameAction blueprint, List < GameAction > materials);
-            //TO DO : this triggers the action itself
             Debug.Log(string.Format("The ActionController was asked to do: {0}", GetListActionsAsString(completeList)));
+            if (verb.Name == "CreateBlueprint")
+                BuildController.instance.CreateBlueprint(blueprint, materials);
         }
 
         private void Awake()
@@ -43,7 +42,7 @@ namespace Beyond
             instance = this;
             // TO DO : This will eventually come from a conf file, and probably be done when the Game wakes up
             GameAction a;
-            a = new GameAction("Build" , ActionType.Verb); AllActions.Add(a);
+            a = new GameAction("CreateBlueprint", ActionType.Verb); AllActions.Add(a);
             a = new GameAction("Structure", ActionType.Category); AllActions.Add(a);
             a = new GameAction("Network", ActionType.Category); AllActions.Add(a);
             a = new GameAction("Furniture", ActionType.Category); AllActions.Add(a);
@@ -53,9 +52,9 @@ namespace Beyond
             a = new GameAction("Concrete", ActionType.Material); AllActions.Add(a);
             a = new GameAction("Wood", ActionType.Material); AllActions.Add(a);
             a = new GameAction("Metal", ActionType.Material); AllActions.Add(a);
-            AllActions.Find(a => a.Name == "Build").AddNextAction(AllActions.Find(a => a.Name == "Structure"));
-            AllActions.Find(a => a.Name == "Build").AddNextAction(AllActions.Find(a => a.Name == "Network"));
-            AllActions.Find(a => a.Name == "Build").AddNextAction(AllActions.Find(a => a.Name == "Furniture"));
+            AllActions.Find(a => a.Name == "CreateBlueprint").AddNextAction(AllActions.Find(a => a.Name == "Structure"));
+            AllActions.Find(a => a.Name == "CreateBlueprint").AddNextAction(AllActions.Find(a => a.Name == "Network"));
+            AllActions.Find(a => a.Name == "CreateBlueprint").AddNextAction(AllActions.Find(a => a.Name == "Furniture"));
             AllActions.Find(a => a.Name == "Structure").AddNextAction(AllActions.Find(a => a.Name == "Foundation"));
             AllActions.Find(a => a.Name == "Structure").AddNextAction(AllActions.Find(a => a.Name == "Wall"));
             AllActions.Find(a => a.Name == "Structure").AddNextAction(AllActions.Find(a => a.Name == "Floor"));
