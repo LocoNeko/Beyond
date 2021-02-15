@@ -25,8 +25,12 @@ namespace Beyond
             if (ActiveBlueprint != null)
             {
                 ActiveBlueprint.transform.localRotation = Quaternion.Inverse(FPSCharacter.transform.localRotation);
-                CanPlace = Constraint.CheckConstraint(ActiveBlueprint);
-                ActiveBlueprint.GetComponent<Outline>().OutlineColor = (CanPlace ? Color.green : Color.red);
+                Constraint c = Constraint.GetGameObjectConstraint(ActiveBlueprint);
+                if (c!=null)
+                {
+                    CanPlace = c.CheckConstraint(ActiveBlueprint);
+                    ActiveBlueprint.GetComponent<Outline>().OutlineColor = (CanPlace ? Color.green : Color.red);
+                }
             }
         }
 
@@ -52,11 +56,20 @@ namespace Beyond
 
         public void TryPlacingBlueprint()
         {
+            //TO DO : SHould check if we are on UI, don't click if we are
             if (ActiveBlueprint!=null)
             {
-                if (Constraint.CheckConstraint(ActiveBlueprint))
+                Constraint c = Constraint.GetGameObjectConstraint(ActiveBlueprint);
+
+                if (c!=null  && c.CheckConstraint(ActiveBlueprint))
                 {
                     GameObject PlacedObject = Instantiate(ActiveBlueprint , ActiveBlueprint.transform.position , ActiveBlueprint.transform.rotation);
+
+                    // Disable "isTrigger" on the newly placed object's collider
+                    BoxCollider collider = PlacedObject.GetComponent<BoxCollider>();
+                    collider.isTrigger = false;
+
+                    // Remove Outline
                     Destroy(PlacedObject.GetComponent<Outline>());
                 }
                 DestroyActiveBlueprint();

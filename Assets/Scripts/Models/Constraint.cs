@@ -46,13 +46,30 @@ namespace Beyond
             return true;
         }
 
+        public static Constraint GetGameObjectConstraint(GameObject go)
+        {
+            BeyondComponent bc = go.GetComponent<BeyondComponent>();
+            if (bc == null)
+            {
+                Debug.LogError("Attempting to get constraints on an Object without a BeyondComponent");
+                return null;
+            }
+            Template t = bc.Template;
+            if (t == null)
+            {
+                Debug.LogError("Attempting to get constraints on an Object without a Template in its BeyondComponent");
+                return null;
+            }
+            return t.Constraint;
+        }
+
         public static bool IsWellFormed(Constraint c)
         {
             if (c.Operation == Operation.And || c.Operation == Operation.Or)
             {
                 if (c.Operands.Count < 2)
                 {
-                    Debug.LogError("Constraint And/Or expects at least 2 operands");
+                    Debug.LogError("Constraint "+ c.Operation.ToString() +" expects at least 2 operands");
                     return false;
                 }
 
@@ -60,7 +77,7 @@ namespace Beyond
                 {
                     if (o.GetType() != typeof(Constraint))
                     {
-                        Debug.LogError("Constraint And/Or expects all operands to be Constraints");
+                        Debug.LogError("Constraint " + c.Operation.ToString() + " expects all operands to be Constraints");
                         return false;
                     }
                 }
@@ -88,53 +105,56 @@ namespace Beyond
             return true;
         }
 
-        public static bool CheckConstraint(GameObject go , Constraint c = null)
+        public bool CheckConstraint(GameObject go)
         {
             if (!IsWellFormed(go))
                 return false;
 
-            if (c==null)
-                c = go.GetComponent<BeyondComponent>().Template.Constraint;
+            if (!IsWellFormed(this))
+                return false;
 
-            switch (c.Operation)
+            switch (Operation)
             {
+                case (Operation.Or):
+                    return CheckOr(go);
                 case (Operation.And):
-                    return CheckAnd(go, c);
+                    return CheckAnd(go);
                 case (Operation.BaseIn):
-                    return CheckBaseIn(go , c);
+                    return CheckBaseIn(go);
                 case (Operation.TopClear):
-                    return CheckTopClear(go, c);
+                    return CheckTopClear(go);
                 default:
                     break;
             }
             return false;
         }
 
-        public static bool CheckAnd(GameObject go, Constraint c)
+        public bool CheckOr(GameObject go)
         {
-            if (!IsWellFormed(go))
-                return false;
-
-            if (!IsWellFormed(c))
-                return false;
-
-            foreach (object o in c.Operands)
+            foreach (object o in Operands)
             {
-                if (!CheckConstraint(go, (Constraint)o))
+                Constraint c = (Constraint)o;
+                if (c.CheckConstraint(go))
+                    return true;
+            }
+
+            return false;
+        }
+        public bool CheckAnd(GameObject go)
+        {
+            foreach (object o in Operands)
+            {
+                Constraint c = (Constraint)o;
+                if (!c.CheckConstraint(go))
                     return false;
             }
 
             return true;
         }
-        public static bool CheckBaseIn(GameObject go , Constraint c)
+
+        public bool CheckBaseIn(GameObject go)
         {
-            if (!IsWellFormed(go))
-                return false;
-
-            if (!IsWellFormed(c))
-                return false;
-
-            float depth = (float)c.Operands[0] ;
+            float depth = (float)Operands[0] ;
 
             Vector3 BoxCast = go.GetComponent<BeyondComponent>().Template.CastBox;
             Vector3 p = go.transform.position;
@@ -160,11 +180,8 @@ namespace Beyond
             return true;
         }
     
-        public static bool CheckTopClear(GameObject go , Constraint c)
+        public bool CheckTopClear(GameObject go)
         {
-            if (!IsWellFormed(go))
-                return false;
-
             Template template = go.GetComponent<BeyondComponent>().Template;
             Vector3 castFrom = go.transform.position;
             castFrom.y = 1000f; // TO DO Cast from the highest possible altitude
