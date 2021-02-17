@@ -31,9 +31,9 @@ namespace Beyond
             List<GameAction> categories = completeList.FindAll(a => a.ActionType == ActionType.Category);
             List<GameAction> materials = completeList.FindAll(a => a.ActionType == ActionType.Material);
 
-            Debug.Log(string.Format("The ActionController was asked to do: {0}", GetListActionsAsString(completeList)));
+            //Debug.Log(string.Format("The ActionController was asked to do: {0}", GetListActionsAsString(completeList)));
             if (verb.Name == "CreateBlueprint")
-                BuildController.instance.CreateBlueprint(blueprint, materials);
+                BuildController.instance.CreateBlueprint(blueprint, BuildingMaterial.ActionsToMaterials(materials));
         }
 
         private void Awake()

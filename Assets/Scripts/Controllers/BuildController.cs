@@ -9,32 +9,45 @@ namespace Beyond
     {
         public static float blueprintDistanceFromCamera = 5f;
         public static BuildController instance;
+        public static int MaxDraggedObjects = 200;
+        public GameObject TestSphere;
 
         [SerializeField] private GameObject FPSCharacter;
         [SerializeField] public GameObject ActiveBlueprint { get; protected set; }
-        [SerializeField] public bool CanPlace;
+        [SerializeField] public Material GhostGreen;
+        [SerializeField] public Material GhostRed;
+        [SerializeField] public Material Concrete;
+
+        // Dragging stuff
+        [SerializeField] public GameObject GameObject_DragFrom { get; protected set; }
+        private List<GameObject> draggedObjects;
+        [SerializeField] private Vector3Int positionInt_DragTo;
+        [SerializeField] private Dictionary<string, Vector3> dragDirections;
 
         void Start()
         {
+            draggedObjects = new List<GameObject>();
+            dragDirections = new Dictionary<string, Vector3>();
             instance = this;
         }
 
         void Update()
         {
-            // If we have an active blueprint, update its visuals (keep it horizontal, show outline, etc)
-            if (ActiveBlueprint != null)
+            // We are dragging
+            if (GameObject_DragFrom != null)
+            {
+                ShowDraggedObjects();
+            }
+
+            // If we have an active blueprint, update its visuals (keep it horizontal, green/red based on whehter it can be placed, etc)
+            else if (ActiveBlueprint != null)
             {
                 ActiveBlueprint.transform.localRotation = Quaternion.Inverse(FPSCharacter.transform.localRotation);
-                Constraint c = Constraint.GetGameObjectConstraint(ActiveBlueprint);
-                if (c!=null)
-                {
-                    CanPlace = c.CheckConstraint(ActiveBlueprint);
-                    ActiveBlueprint.GetComponent<Outline>().OutlineColor = (CanPlace ? Color.green : Color.red);
-                }
+                EffectManager.UpdateGhostVisuals(ActiveBlueprint);
             }
         }
 
-        public void CreateBlueprint(GameAction blueprint, List<GameAction> materials)
+        public void CreateBlueprint(GameAction blueprint, List<BuildingMaterial> materials)
         {
             // Instantiate a prefab of that blueprint
             // Show it floating 5 units away from where the FPS is looking
@@ -45,8 +58,9 @@ namespace Beyond
                 DestroyActiveBlueprint();
                 ActiveBlueprint = Instantiate(t.Prefab, FPSCharacter.transform, false);
                 BeyondComponent bc = ActiveBlueprint.AddComponent<BeyondComponent>();
-                bc.SetTemplate(t);
+                bc.SetValues(t , State.Ghost , materials);
                 ActiveBlueprint.transform.Translate(new Vector3(0, 0, blueprintDistanceFromCamera));
+                ActiveBlueprint.name = string.Format("Ghost ({0})" , t.Name);
             }
             else
             {
@@ -54,25 +68,145 @@ namespace Beyond
             }
         }
 
+        /*
+         * SUPERCEEDED by dragging (or is it ?)
         public void TryPlacingBlueprint()
         {
             //TO DO : SHould check if we are on UI, don't click if we are
             if (ActiveBlueprint!=null)
             {
-                Constraint c = Constraint.GetGameObjectConstraint(ActiveBlueprint);
-
-                if (c!=null  && c.CheckConstraint(ActiveBlueprint))
+                if ( Constraint.CheckRootConstraint(ActiveBlueprint))
                 {
                     GameObject PlacedObject = Instantiate(ActiveBlueprint , ActiveBlueprint.transform.position , ActiveBlueprint.transform.rotation);
 
-                    // Disable "isTrigger" on the newly placed object's collider
-                    BoxCollider collider = PlacedObject.GetComponent<BoxCollider>();
-                    collider.isTrigger = false;
+                    // Copy BeyondComponent values from the blueprint to the PlacedObject
+                    BeyondComponent blueprintBC = ActiveBlueprint.GetComponent<BeyondComponent>();
+                    BeyondComponent bc = PlacedObject.GetComponent<BeyondComponent>();
+                    bc.SetValues(blueprintBC.Template, State.Ghost , blueprintBC.BuildingMaterials);
 
-                    // Remove Outline
-                    Destroy(PlacedObject.GetComponent<Outline>());
+                    // Remove Outline, disable "isTrigger", set layer, name object
+                    PlacedObject.GetComponent<BoxCollider>().isTrigger = false;
+                    PlacedObject.layer = LayerMask.NameToLayer("Buildings");
+                    PlacedObject.name = bc.Template.Name;
+                    CreateNewBeyondGroup(bc);
                 }
                 DestroyActiveBlueprint();
+            }
+        }
+        */
+
+        public void StartDragging()
+        {
+            if (ActiveBlueprint != null)
+            {
+                if (Constraint.CheckRootConstraint(ActiveBlueprint))
+                {
+                    GameObject_DragFrom = Instantiate(ActiveBlueprint, ActiveBlueprint.transform.position, ActiveBlueprint.transform.rotation);
+                    BeyondComponent bc = ActiveBlueprint.GetComponent<BeyondComponent>();
+                    GameObject_DragFrom.GetComponent<BeyondComponent>().CopyValues(bc);
+
+                    dragDirections = Utility.RotatedAxes(GameObject_DragFrom.transform.rotation);
+
+                    // Clearing & initialising the pool of DraggedObjects
+                    for (int i=0; i<MaxDraggedObjects; i++)
+                    {
+                        GameObject go = Instantiate(ActiveBlueprint);
+                        go.SetActive(false);
+                        // I need to initialise the BC of each dragged object so I know what template they are. Instantiating them was not enough to copy the ActiveBlueprint's BC
+                        go.GetComponent<BeyondComponent>().CopyValues(bc);
+                        draggedObjects.Add(go);
+                    }
+
+                    ActiveBlueprint.SetActive(false);
+                }
+            }
+            Debug.Log("Start Dragging initialised draggedObjects: "+draggedObjects.Count);
+        }
+
+        public void StopDragging()
+        {
+            GameObject FirstObject = Instantiate(GameObject_DragFrom);
+            BeyondComponent BC_DragFrom = GameObject_DragFrom.GetComponent<BeyondComponent>();
+            FirstObject.GetComponent<BeyondComponent>().CopyValues(BC_DragFrom);
+            SetBlueprintFromGhost(FirstObject);
+            Destroy(GameObject_DragFrom);
+
+            foreach (GameObject go in draggedObjects)
+            {
+                // TO DO : We need to check a bit more than that: can't have a bunch of objects split in several groups because they failed constraint. All draggedObject should form 1 block
+                if (Constraint.CheckRootConstraint(go))
+                {
+                    GameObject ThisObject = Instantiate(go);
+                    BeyondComponent BC_ThisObject = go.GetComponent<BeyondComponent>();
+                    ThisObject.GetComponent<BeyondComponent>().CopyValues(BC_ThisObject);
+                    SetBlueprintFromGhost(ThisObject);
+                }
+                Destroy(go);
+            }
+            draggedObjects.Clear();
+            DestroyActiveBlueprint();
+        }
+
+        void SetBlueprintFromGhost(GameObject go)
+        {
+            go.GetComponent<BoxCollider>().isTrigger = false;
+            go.layer = LayerMask.NameToLayer("Buildings");
+            BeyondComponent bc = go.GetComponent<BeyondComponent>();
+            go.name = bc.Template.Name;
+            bc.SetState(State.Blueprint);
+            EffectManager.UpdateBlueprintVisuals(go);
+        }
+
+        public void ShowDraggedObjects()
+        {
+            // Find the "to" location based on reference object and camera position and whére I'm löokìng
+            Vector3 pos;
+            if (Utility.LinePlaneIntersection(out pos, FPSCharacter.transform.position, FPSCharacter.transform.forward, Vector3.up, GameObject_DragFrom.transform.position))
+            {
+                TestSphere.transform.position = pos;
+                // Find the corresponding position in units of 1
+                Vector3Int newPositionInt_DragTo = Vector3Int.RoundToInt(pos - GameObject_DragFrom.transform.position);
+                // Only update if we are dragging to a new position
+                if (newPositionInt_DragTo != positionInt_DragTo)
+                {
+                    positionInt_DragTo = newPositionInt_DragTo;
+                    //Debug.Log("Dragging to: " + positionInt_DragTo);
+                    // Compare to my current dragged objects positions
+                    // Create/Enable all pooled Objects that are in there, put them where they should be
+
+                    int i = 0;
+                    for (int z = 0; Mathf.Abs(z) <= Mathf.Abs(positionInt_DragTo.z); z += (positionInt_DragTo.z >= 0 ? 1 : -1))
+                    {
+                        for (int y = 0; Mathf.Abs(y) <= Mathf.Abs(positionInt_DragTo.y); y += (positionInt_DragTo.y >= 0 ? 1 : -1))
+                        {
+                            for (int x = 0; Mathf.Abs(x) <= Mathf.Abs(positionInt_DragTo.x); x += (positionInt_DragTo.x >= 0 ? 1 : -1))
+                            {
+                                if (x != 0 || y != 0 || z != 0)
+                                {
+                                    draggedObjects[i].transform.position = GameObject_DragFrom.transform.position +
+                                        x * dragDirections["x"] + y * dragDirections["y"] + z * dragDirections["z"];
+                                    draggedObjects[i].transform.rotation = GameObject_DragFrom.transform.rotation;
+                                    draggedObjects[i].name= GameObject_DragFrom.name+" ["+i+"]";
+                                    draggedObjects[i].SetActive(true);
+                                    EffectManager.UpdateGhostVisuals(draggedObjects[i]);
+                                    i++;
+                                    if (i >= MaxDraggedObjects)
+                                        break;
+                                }
+                            }
+                            if (i >= MaxDraggedObjects)
+                                break;
+                        }
+                        if (i >= MaxDraggedObjects)
+                            break;
+                    }
+
+                    // Disable all pooled Objects that are not in there any more
+                    for (int j = i; j < MaxDraggedObjects; j++)
+                    {
+                        draggedObjects[j].SetActive(false);
+                    }
+                }
             }
         }
 
@@ -81,5 +215,24 @@ namespace Beyond
             if (ActiveBlueprint != null)
                 Destroy(ActiveBlueprint);
         }
+        public void CreateNewBeyondGroup(BeyondComponent bc, string name = null)
+        {
+            if (name == null)
+            { // Auto give name
+                name = String.Format("Group {0:0000}", GameManager.instance.Place.BeyondGroups.Count);
+            }
+            if (bc != null)
+            {
+                // bc.transform.position - bc.template.pivotOffset : THIS IS ESSENTIAL - This allows us to properly set the pivot of the group 
+                BeyondGroup group = new BeyondGroup(name, bc.transform.position - bc.Template.PivotOffset, bc.transform.rotation);
+                group.AddBeyondComponent(bc , Vector3Int.zero);
+                GameManager.instance.Place.BeyondGroups.Add(group);
+            }
+            else
+            {
+                Debug.LogError("CreateNewBeyondGroup attempted to create an emtpy group");
+            }
+        }
+
     }
 }

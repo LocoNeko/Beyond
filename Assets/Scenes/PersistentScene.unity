@@ -155,7 +155,6 @@ MonoBehaviour:
   loadingScreen: {fileID: 1334884138}
   progressBar: {fileID: 1334884140}
   loadingText: {fileID: 1334884139}
-  mainSceneAudioListener: {fileID: 0}
   tipsText: {fileID: 1334884147}
   alphaCanvas: {fileID: 1334884142}
   tips:
@@ -165,6 +164,7 @@ MonoBehaviour:
     the air, the person died as a result of wounds received in battle; if the horse
     has all four legs on the ground, the person died of natural causes.
   - quite short tip, but not that short
+  - Did you know ? When you buy one thing, you can get 2 for double the price.
   tipCount: 0
 --- !u!4 &405450990
 Transform:

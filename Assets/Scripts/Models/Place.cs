@@ -9,34 +9,36 @@ namespace Beyond
     [System.Serializable]
     public class Place
     {
-        public string name { get; protected set; }
-        public Hemisphere hemisphere { get; protected set; }
-        public Gametime gametime { get; protected set; }
-        public int Length { get; protected set; }
-        public int Width { get; protected set; }
-        public int Height { get; protected set; }
-        public int LowestY { get; protected set; }
+        [SerializeField]public string Name { get; protected set; }
+        [SerializeField] public Hemisphere Hemisphere { get; protected set; }
+        [SerializeField] public Gametime Gametime { get; protected set; }
+        [SerializeField] public int Length { get; protected set; }
+        [SerializeField] public int Width { get; protected set; }
+        [SerializeField] public int Height { get; protected set; }
+        [SerializeField] public int LowestY { get; protected set; }
+        [SerializeField] public List<BeyondGroup> BeyondGroups { get; protected set; }
 
         public Place(string s = "A test place", int l = 1000, int w = 1000, int h = 200, int ly = -20)
         {
-            name = s;
-            hemisphere = Hemisphere.North;
-            gametime = new Gametime();
+            Name = s;
+            Hemisphere = Hemisphere.North;
+            Gametime = new Gametime();
             Length = l;
             Width = w;
             Height = h;
             LowestY = ly;
-            Debug.Log(string.Format("New place '{0}' created" , name));
+            BeyondGroups = new List<BeyondGroup>();
+            Debug.Log(string.Format("New place '{0}' created" , Name));
         }
 
         public void update(float deltatime)
         {
-            gametime.Update(deltatime);
+            Gametime.Update(deltatime);
         }
 
         public Season GetSeason()
         {
-            return gametime.GetSeason(hemisphere);
+            return Gametime.GetSeason(Hemisphere);
         }
 
     }

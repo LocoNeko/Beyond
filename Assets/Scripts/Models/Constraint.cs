@@ -10,7 +10,8 @@ namespace Beyond
         Or,
         And,
         BaseIn,
-        TopClear
+        TopClear,
+        AvoidCollision
     }
     public class Constraint
     {
@@ -101,8 +102,32 @@ namespace Beyond
                 }
             }
 
+            if (c.Operation == Operation.AvoidCollision)
+            {
+                if ((c.Operands.Count) <1)
+                {
+                    Debug.LogError("Constraint AvoidCollision expects at least one layer name");
+                    return false;
+                }
+
+                foreach (object o in c.Operands)
+                {
+                    if (o.GetType() != typeof(string) || LayerMask.NameToLayer((string)o) == -1)
+                    {
+                        Debug.LogError("Constraint AvoidCollision expects all operands to be an existing layer name");
+                        return false;
+                    }
+                }
+
+            }
 
             return true;
+        }
+
+        public static bool CheckRootConstraint(GameObject go)
+        {
+            Constraint c = GetGameObjectConstraint(go);
+            return (c==null ? false : c.CheckConstraint(go));
         }
 
         public bool CheckConstraint(GameObject go)
@@ -123,6 +148,8 @@ namespace Beyond
                     return CheckBaseIn(go);
                 case (Operation.TopClear):
                     return CheckTopClear(go);
+                case Operation.AvoidCollision:
+                    return CheckAvoidCollision(go);
                 default:
                     break;
             }
@@ -188,6 +215,17 @@ namespace Beyond
             float rayLength = castFrom.y - go.transform.position.y - template.CastBox.y * 2;
             bool result = Physics.BoxCast(castFrom, template.CastBox, Vector3.down, go.transform.rotation, rayLength, LayerMask.GetMask("Terrain"));
             return !result;
+        }
+
+        public bool CheckAvoidCollision(GameObject go)
+        {
+            BeyondComponent bc = go.GetComponent<BeyondComponent>();
+            foreach (string layerName in Operands)
+            {
+                if (bc.IsCollidingWith(layerName))
+                    return false;
+            }
+            return true;
         }
     }
 }

@@ -11,8 +11,9 @@ namespace Beyond
 {
     public class GameManager : MonoBehaviour
     {
-        private Place place;
         private float timer;
+        [SerializeField] public Place Place { get; protected set; }
+
         [Header("Useful Objects")]
         [SerializeField] private MapMagic.Core.MapMagicObject mm;
         [SerializeField] private GameObject FPSController;
@@ -28,6 +29,8 @@ namespace Beyond
         [SerializeField] private Sprite HeavyRain;
 
         [SerializeField] public List<Template> Templates { get; protected set; }
+        //TO DO : Not sure the list of BuildingMaterials belongs here
+        [SerializeField] public List<BuildingMaterial> BuildingMaterials { get; protected set; }
 
         public static GameManager instance ;
 
@@ -37,8 +40,7 @@ namespace Beyond
         {
             initialised = false;
             instance = this;
-            place = new Place();
-            Templates = new List<Template>();
+            Place = new Place();
         }
 
         // Start is called before the first frame update
@@ -87,18 +89,18 @@ namespace Beyond
             // Update every 1/10th of a second
             if(timer>0.1f)
             {
-                place.update(timer);
+                Place.update(timer);
                 timer = 0f;
 
-                textTime.text = place.gametime.TimeStr();
-                textDate.text = place.gametime.DateOnlyStr();
+                textTime.text = Place.Gametime.TimeStr();
+                textDate.text = Place.Gametime.DateOnlyStr();
 
                 // TO DO : Makes this more efficient (only to happen when GameTime changed, should be an event)
                 EnviroSky.instance.GameTime.Seconds = 0;
-                EnviroSky.instance.GameTime.Minutes = place.gametime.getMinute();
-                EnviroSky.instance.GameTime.Hours = place.gametime.getHour();
-                EnviroSky.instance.GameTime.Days = place.gametime.DayInYear();
-                EnviroSky.instance.GameTime.Years = place.gametime.getYear() + 2020;
+                EnviroSky.instance.GameTime.Minutes = Place.Gametime.getMinute();
+                EnviroSky.instance.GameTime.Hours = Place.Gametime.getHour();
+                EnviroSky.instance.GameTime.Days = Place.Gametime.DayInYear();
+                EnviroSky.instance.GameTime.Years = Place.Gametime.getYear() + 2020;
             }
             /*
             Debug.Log(
@@ -125,13 +127,24 @@ namespace Beyond
                     FPSController.transform.position = characterPosition;
                     FPSController.SetActive(true);
                 }
-                // Initiliase templates
+
                 //TO DO : all of this should be in a conf file
+
+                //Initiailise BuildingMaterials TODO : may rename them to BuildingMaterials
+                BuildingMaterials = new List<BuildingMaterial>();
+
+                BuildingMaterials.Add(new BuildingMaterial("Concrete"));
+                BuildingMaterials.Add(new BuildingMaterial("Wood"));
+                BuildingMaterials.Add(new BuildingMaterial("Metal"));
+
+                // Initiliase templates
+                Templates = new List<Template>();
 
                 // Foundation
                 Constraint c1 = new Constraint(Operation.BaseIn, new List<object>() { 0.25f });
                 Constraint c2 = new Constraint(Operation.TopClear, new List<object>());
-                Constraint c = new Constraint(Operation.And, new List<object>() { c1, c2 });
+                Constraint c3 = new Constraint(Operation.AvoidCollision, new List<object>() { "Buildings" });
+                Constraint c = new Constraint(Operation.And, new List<object>() { c1, c2, c3 });
                 Template t = new Template(
                     "Foundation",
                     Resources.Load("Prefabs/Blueprints/Foundation") as GameObject,
@@ -160,13 +173,13 @@ namespace Beyond
 
         public void PauseGame()
         {
-            if (place.gametime.getSpeed()==0)
+            if (Place.Gametime.getSpeed()==0)
             {
-                place.gametime.setSpeed(1);
+                Place.Gametime.setSpeed(1);
             }
             else
             {
-                place.gametime.setSpeed(0);
+                Place.Gametime.setSpeed(0);
             }
         }
     }
