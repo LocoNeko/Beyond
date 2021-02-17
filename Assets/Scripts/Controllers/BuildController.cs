@@ -11,6 +11,11 @@ namespace Beyond
         public static BuildController instance;
         public static int MaxDraggedObjects = 200;
         public GameObject TestSphere;
+        /*
+        public GameObject SphereX;
+        public GameObject SphereY;
+        public GameObject SphereZ;
+        */
 
         [SerializeField] private GameObject FPSCharacter;
         [SerializeField] public GameObject ActiveBlueprint { get; protected set; }
@@ -163,16 +168,19 @@ namespace Beyond
             Vector3 pos;
             if (Utility.LinePlaneIntersection(out pos, FPSCharacter.transform.position, FPSCharacter.transform.forward, Vector3.up, GameObject_DragFrom.transform.position))
             {
-                TestSphere.transform.position = pos;
+                //TestSphere.transform.position = pos;
+                
                 // Find the corresponding position in units of 1
-                Vector3Int newPositionInt_DragTo = Vector3Int.RoundToInt(pos - GameObject_DragFrom.transform.position);
+                Vector3 Diff = pos - GameObject_DragFrom.transform.position; // the Vecotr3 difference between where we are dragging from and to
+                Vector3 DiffRotated = Utility.RotateAroundPoint(Diff, Vector3.zero , Quaternion.Inverse(GameObject_DragFrom.transform.rotation)); // Counter-rotate it to cancel the rotation of the object we're dragging
+                Vector3Int newPositionInt_DragTo = Vector3Int.RoundToInt(DiffRotated); // round it to integers
+
                 // Only update if we are dragging to a new position
                 if (newPositionInt_DragTo != positionInt_DragTo)
                 {
                     positionInt_DragTo = newPositionInt_DragTo;
-                    //Debug.Log("Dragging to: " + positionInt_DragTo);
                     // Compare to my current dragged objects positions
-                    // Create/Enable all pooled Objects that are in there, put them where they should be
+                    // Create/Enable all pooled Objects that are in there, put them where they should be thanks to the dragDirections we set when we started dragging
 
                     int i = 0;
                     for (int z = 0; Mathf.Abs(z) <= Mathf.Abs(positionInt_DragTo.z); z += (positionInt_DragTo.z >= 0 ? 1 : -1))
@@ -183,8 +191,7 @@ namespace Beyond
                             {
                                 if (x != 0 || y != 0 || z != 0)
                                 {
-                                    draggedObjects[i].transform.position = GameObject_DragFrom.transform.position +
-                                        x * dragDirections["x"] + y * dragDirections["y"] + z * dragDirections["z"];
+                                    draggedObjects[i].transform.position = GameObject_DragFrom.transform.position + x * dragDirections["x"] + y * dragDirections["y"] + z * dragDirections["z"];
                                     draggedObjects[i].transform.rotation = GameObject_DragFrom.transform.rotation;
                                     draggedObjects[i].name= GameObject_DragFrom.name+" ["+i+"]";
                                     draggedObjects[i].SetActive(true);
