@@ -31,6 +31,8 @@ namespace Beyond
                 //TO DO : Should come from BuildingMaterial
                 if (bc.BuildingMaterials.Find(bm => bm.Name=="Concrete") != null)
                     go.GetComponent<Renderer>().material = BuildController.instance.Concrete;
+                if (bc.BuildingMaterials.Find(bm => bm.Name == "Wood") != null)
+                    go.GetComponent<Renderer>().material = BuildController.instance.Wood;
             }
         }
     }

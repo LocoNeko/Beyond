@@ -17,6 +17,7 @@ namespace Beyond
         [SerializeField] public Material GhostGreen;
         [SerializeField] public Material GhostRed;
         [SerializeField] public Material Concrete;
+        [SerializeField] public Material Wood;
 
         // Dragging stuff
         [SerializeField] public GameObject GameObject_DragFrom { get; protected set; }
@@ -52,8 +53,14 @@ namespace Beyond
                     timer = 0f;
                     ActiveBlueprint.transform.localRotation = Quaternion.Inverse(FPSCharacter.transform.localRotation);
                     EffectManager.UpdateGhostVisuals(ActiveBlueprint);
-                    GameObject ClosestSnapCandidate = SnapController.GetSnapCandidate(ActiveBlueprint);
-                    TestSpheres[0].transform.position = ((ClosestSnapCandidate != null) ? ClosestSnapCandidate.transform.position : Vector3.zero);
+
+                    //DEBUG - in case I need to confirm the cell's centre
+                    //TestSpheres[0].transform.position = ActiveBlueprint.GetComponent<BeyondComponent>().Template.GetCellCentre(ActiveBlueprint);
+                    //DEBUG - All snap objects: SnapController.DebugSnap(TestSpheres, ActiveBlueprint);
+                    //DEBUG - All snap targets:
+                    SnapController.DebugSnapTargets(TestSpheres, ActiveBlueprint);
+                    //GameObject ClosestSnapCandidate = SnapController.GetSnapCandidate(ActiveBlueprint);
+                    //TestSpheres[0].transform.position = ((ClosestSnapCandidate != null) ? ClosestSnapCandidate.transform.position : Vector3.zero);
                 }
             }
         }

@@ -61,6 +61,7 @@ namespace Beyond
             AllActions.Find(a => a.Name == "Foundation").AddNextAction(AllActions.Find(a => a.Name == "Concrete"));
             AllActions.Find(a => a.Name == "Foundation").AddNextAction(AllActions.Find(a => a.Name == "Wood"));
             AllActions.Find(a => a.Name == "Foundation").AddNextAction(AllActions.Find(a => a.Name == "Metal"));
+            AllActions.Find(a => a.Name == "Wall").AddNextAction(AllActions.Find(a => a.Name == "Wood"));
         }
 
         public GameAction GetActionByName(string s)

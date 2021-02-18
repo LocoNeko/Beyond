@@ -11,6 +11,7 @@ namespace Beyond
         And,
         BaseIn,
         TopClear,
+        AllClear,
         AvoidCollision
     }
     public class Constraint
@@ -93,11 +94,11 @@ namespace Beyond
                 }
             }
 
-            if (c.Operation == Operation.TopClear)
+            if (c.Operation == Operation.TopClear || c.Operation == Operation.AllClear)
             {
                 if (c.Operands.Count != 0)
                 {
-                    Debug.LogError("Constraint TopClear expects no operand");
+                    Debug.LogError("Constraint " + c.Operation.ToString() + " expects no operand");
                     return false;
                 }
             }
@@ -148,6 +149,8 @@ namespace Beyond
                     return CheckBaseIn(go);
                 case (Operation.TopClear):
                     return CheckTopClear(go);
+                case (Operation.AllClear):
+                    return CheckAllClear(go);
                 case Operation.AvoidCollision:
                     return CheckAvoidCollision(go);
                 default:
@@ -217,6 +220,13 @@ namespace Beyond
             return !result;
         }
 
+        public bool CheckAllClear(GameObject go)
+        {
+            Template template = go.GetComponent<BeyondComponent>().Template;
+            Collider[] collidersHit = Physics.OverlapBox(go.transform.position, template.CastBox, go.transform.rotation, LayerMask.GetMask("Terrain"));
+            return (collidersHit.Length == 0);
+        }
+
         public bool CheckAvoidCollision(GameObject go)
         {
             BeyondComponent bc = go.GetComponent<BeyondComponent>();
@@ -231,14 +241,6 @@ namespace Beyond
 
             Collider[] hitColliders = Physics.OverlapBox(go.transform.position, bc.Template.CastBox, go.transform.rotation, mask);
             return (hitColliders.Length == 0);
-            /*
-            foreach (string layerName in Operands)
-            {
-                if (bc.IsCollidingWith(layerName))
-                    return false;
-            }
-            return true;
-            */
         }
     }
 }

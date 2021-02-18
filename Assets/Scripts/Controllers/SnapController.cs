@@ -12,14 +12,14 @@ namespace Beyond
         {
             GameObject candidate = null;
             float minD = -1;
-            Vector3 snapFrom = st.GetToCentre(go.transform);
+            Vector3 snapFrom = st.GetToCentre(go);
             foreach (Collider col in Physics.OverlapSphere(snapFrom, 3f))
             {
                 BeyondComponent bc = col.gameObject.GetComponent<BeyondComponent>();
                 if (bc!=null)
                 {
                     float d = Vector3.Distance(snapFrom, bc.Template.GetCellCentre(col.gameObject));
-                    if ( (d<=distanceToSnap) && (col.gameObject!=go) && (bc.Template == st.ToTemplate) && (bc.PosInCell == st.ToPos))
+                    if ( (d<=distanceToSnap) && (col.gameObject!=go) && (bc.Template.ContainsTag(st.ToTags)) && (bc.PosInCell == st.ToPos))
                     {
                         // We found a candidate !
                         if (d<minD || minD== -1)
@@ -55,7 +55,6 @@ namespace Beyond
             return candidate;
         }
 
-
         // Here in case I ever need to see all Snap Candidates of an object. Requires a list of test spheres (or whatever) to visually show them
         public static void DebugSnap(List<GameObject> testSpheres , GameObject blueprint)
         {
@@ -68,6 +67,21 @@ namespace Beyond
                 GameObject snapTarget = SnapController.GetSnapCandidate(blueprint, st);
                 if (snapTarget != null)
                     testSpheres[i++].transform.position = snapTarget.transform.position;
+            }
+        }
+
+        // To show all snap targets for an object
+        public static void DebugSnapTargets(List<GameObject> testSpheres, GameObject blueprint)
+        {
+            foreach (GameObject go in testSpheres)
+                go.transform.position = Vector3.zero;
+            int i = 0;
+            BeyondComponent bc = blueprint.GetComponent<BeyondComponent>();
+            Template t = bc.Template;
+            foreach (SnapTarget st in t.SnapTargets)
+            {
+                if(bc.PosInCell == st.FromPos)
+                    testSpheres[i++].transform.position = st.GetToCentre(blueprint);
             }
 
         }

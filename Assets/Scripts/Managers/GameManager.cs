@@ -152,16 +152,48 @@ namespace Beyond
                     new Vector3(0.5f, 0.5f, 0.5f) ,
                     new List<PosInCell>() { PosInCell.Centre}
                 );
+                t.AddTag("Foundation");
+                Templates.Add(t);
+
+                // Wall
+                c1 = new Constraint(Operation.AvoidCollision, new List<object>() { "Buildings" });
+                c2 = new Constraint(Operation.AllClear, new List<object>());
+                c = new Constraint(Operation.And, new List<object>() { c1, c2});
+                Template t2 = new Template(
+                    "Wall",
+                    Resources.Load("Prefabs/Blueprints/Wall") as GameObject,
+                    c,
+                    new Vector3(0.5f, 1.4f, 0.2f),
+                    new List<PosInCell>() { PosInCell.Front , PosInCell.Back , PosInCell.Left , PosInCell.Right },
+                    new Vector3(0f , -0.9f , -0.4f)
+                );
+                t2.AddTag("Wall");
+                Templates.Add(t2);
+
                 /*
                  * OH NOES ! I NEED 2 PASSES !
                  * 1 - To create all templates without their SnapTargets
                  * 2 - To Add their snap targets so they can reference any other templates
                  */
-                Templates.Add(t);
-                t.AddSnapTarget(PosInCell.Centre, -1, 0, 0, GetTemplate("Foundation"), PosInCell.Centre);
-                t.AddSnapTarget(PosInCell.Centre, 1, 0, 0, GetTemplate("Foundation"), PosInCell.Centre);
-                t.AddSnapTarget(PosInCell.Centre, 0, 0, 1, GetTemplate("Foundation"), PosInCell.Centre);
-                t.AddSnapTarget(PosInCell.Centre, 0, 0, -1, GetTemplate("Foundation"), PosInCell.Centre);
+                t.AddSnapTarget(PosInCell.Centre, -1, 0, 0, new List<string>() { "Foundation"}, PosInCell.Centre);
+                t.AddSnapTarget(PosInCell.Centre, 1, 0, 0, new List<string>() { "Foundation" }, PosInCell.Centre);
+                t.AddSnapTarget(PosInCell.Centre, 0, 0, 1, new List<string>() { "Foundation" }, PosInCell.Centre);
+                t.AddSnapTarget(PosInCell.Centre, 0, 0, -1, new List<string>() { "Foundation" }, PosInCell.Centre);
+
+                // Walls can snap to a Foundation just below them, independtly of their PosInCell
+                t2.AddSnapTarget(PosInCell.Front, 0, -1, 0, new List<string>() { "Foundation" }, PosInCell.Centre);
+                t2.AddSnapTarget(PosInCell.Back, 0, -1, 0, new List<string>() { "Foundation" }, PosInCell.Centre);
+                t2.AddSnapTarget(PosInCell.Left, 0, -1, 0, new List<string>() { "Foundation" }, PosInCell.Centre);
+                t2.AddSnapTarget(PosInCell.Right, 0, -1, 0, new List<string>() { "Foundation" }, PosInCell.Centre);
+                //Walls can snap to Walls on each side, as long as they have the same PosInCell
+                t2.AddSnapTarget(PosInCell.Front, -1, 0, 0, new List<string>() { "Wall" }, PosInCell.Front);
+                t2.AddSnapTarget(PosInCell.Front, 1, 0, 0, new List<string>() { "Wall" }, PosInCell.Front);
+                t2.AddSnapTarget(PosInCell.Back, -1, 0, 0, new List<string>() { "Wall" }, PosInCell.Back);
+                t2.AddSnapTarget(PosInCell.Back, 1, 0, 0, new List<string>() { "Wall" }, PosInCell.Back);
+                t2.AddSnapTarget(PosInCell.Left, 0, 0, -1, new List<string>() { "Wall" }, PosInCell.Left);
+                t2.AddSnapTarget(PosInCell.Left, 0, 0, 1, new List<string>() { "Wall" }, PosInCell.Left);
+                t2.AddSnapTarget(PosInCell.Right, 0, 0, -1, new List<string>() { "Wall" }, PosInCell.Right);
+                t2.AddSnapTarget(PosInCell.Right, 0, 0, 1, new List<string>() { "Wall" }, PosInCell.Right);
                 initialised = true;
             }
         }

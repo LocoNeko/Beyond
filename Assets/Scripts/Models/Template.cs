@@ -18,6 +18,7 @@ namespace Beyond
         public Vector3 CellCentre { get; protected set; }
         public List<PosInCell> ValidPosInCell { get; protected set; }
         public List<SnapTarget> SnapTargets { get; protected set; }
+        public List<string> Tags { get; protected set; }
 
         public Template(string name, GameObject prefab, Constraint constraint , Vector3 castBox , List<PosInCell> validPosInCell , Vector3? cellCentre = null)
         {
@@ -32,6 +33,7 @@ namespace Beyond
                 ValidPosInCell.Add(pc);
             }
             SnapTargets = new List<SnapTarget>();
+            Tags = new List<string>();
         }
 
         public void SetValues(Template t)
@@ -49,6 +51,10 @@ namespace Beyond
             {
                 SnapTargets.Add(st);
             }
+            foreach (string s in t.Tags)
+            {
+                Tags.Add(s);
+            }
         }
 
         public Vector3 GetCellCentre(GameObject go)
@@ -56,10 +62,31 @@ namespace Beyond
             return go.transform.position + Utility.RotateAroundPoint(CellCentre, Vector3.zero, go.transform.rotation);
         }
 
-        public void AddSnapTarget(PosInCell fromPos, int x, int y, int z, Template template, PosInCell toPos)
+        public void AddSnapTarget(PosInCell fromPos, int x, int y, int z, List<string> totags, PosInCell toPos)
         {
-            SnapTarget st = new SnapTarget(fromPos, x, y, z, template, toPos);
+            SnapTarget st = new SnapTarget(fromPos, x, y, z, totags, toPos);
             SnapTargets.Add(st);
+        }
+
+        public void AddTag(string s)
+        {
+            if (Tags==null)
+                Tags = new List<string>();
+            Tags.Add(s);
+        }
+
+        public bool ContainsTag(string s)
+        {
+            return Tags.Contains(s);
+        }
+        public bool ContainsTag(List<string> ls)
+        {
+            foreach (string s in ls)
+            {
+                if (Tags.Contains(s))
+                    return true;
+            }
+            return false;
         }
     }
 }
