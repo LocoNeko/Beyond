@@ -220,12 +220,25 @@ namespace Beyond
         public bool CheckAvoidCollision(GameObject go)
         {
             BeyondComponent bc = go.GetComponent<BeyondComponent>();
+
+            //TO DO : Can't I make this layer mask better ? Creating a list each time I check collisions is inefficient
+            List<string> layerList = new List<string>();
+            foreach (string layerName in Operands)
+            {
+                layerList.Add(layerName);
+            }
+            LayerMask mask = LayerMask.GetMask(layerList.ToArray());
+
+            Collider[] hitColliders = Physics.OverlapBox(go.transform.position, bc.Template.CastBox, go.transform.rotation, mask);
+            return (hitColliders.Length == 0);
+            /*
             foreach (string layerName in Operands)
             {
                 if (bc.IsCollidingWith(layerName))
                     return false;
             }
             return true;
+            */
         }
     }
 }

@@ -26,43 +26,37 @@ namespace Beyond
             CreateGroupObject();
         }
 
-        public void CreateGroupObject()
+        private GameObject CreateGroupObject()
         {
             GroupObject = new GameObject();
             GroupObject.name = Name;
             GroupObject.transform.position = Position;
             GroupObject.transform.rotation = Rotation;
+            return GroupObject;
         }
 
-        public bool AddBeyondComponent(BeyondComponent bc , Vector3Int localPos)
+        public void AddObject(GameObject go)
         {
-            // On-demand creation of componentList (for deserialization)
-            if (ComponentList == null) ComponentList = new List<BeyondComponent>();
+            if (go == null)
+                throw new BeyondException("GameObject is null");
 
-            if (ComponentList.Contains(bc)) return false;
-            else
-            {
-                ComponentList.Add(bc);
-                // On-demand creation of group GameObject (for deserialization)
-                if (GroupObject == null) CreateGroupObject();
+            if (GroupObject==null)
+                throw new BeyondException("GroupObject is null");
 
-                bc.transform.SetParent(GroupObject.transform, false);
-                bc.transform.localPosition = Vector3.zero;
-                bc.transform.localRotation = Quaternion.identity;
+            BeyondComponent bc = go.GetComponent<BeyondComponent>();
+            if (bc == null)
+                throw new BeyondException("No Beyond Component attached to GameObject");
 
-                return true;
-            }
+            // Set BC's group position
+            Vector3Int groupPosition = Vector3Int.RoundToInt(Utility.RotateAroundPoint(go.transform.position - Position, Vector3.zero, Rotation));
+
+            //TO DO : check if this position is already occupied, which is tricky since some objects (like walls or cables) can co-exist in the same cell
+            bc.SetGroupPosition(groupPosition);
+            go.transform.SetParent(GroupObject.transform);
+            ComponentList.Add(bc);
         }
 
-        public bool RemoveBeyondComponent(BeyondComponent bc)
-        {
-            if (ComponentList.Contains(bc))
-            {
-                ComponentList.Remove(bc);
-                return true;
-            }
-            return false;
-        }
+
 
         public List<BeyondComponent> BeyondComponentsAt(Vector3Int p)
         {

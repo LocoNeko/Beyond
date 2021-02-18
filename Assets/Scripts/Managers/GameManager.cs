@@ -144,14 +144,24 @@ namespace Beyond
                 Constraint c1 = new Constraint(Operation.BaseIn, new List<object>() { 0.25f });
                 Constraint c2 = new Constraint(Operation.TopClear, new List<object>());
                 Constraint c3 = new Constraint(Operation.AvoidCollision, new List<object>() { "Buildings" });
-                Constraint c = new Constraint(Operation.And, new List<object>() { c1, c2, c3 });
+                Constraint c = new Constraint(Operation.And, new List<object>() { c1, c2 , c3 });
                 Template t = new Template(
                     "Foundation",
                     Resources.Load("Prefabs/Blueprints/Foundation") as GameObject,
                     c ,
-                    new Vector3(0.5f, 0.5f, 0.5f)
+                    new Vector3(0.5f, 0.5f, 0.5f) ,
+                    new List<PosInCell>() { PosInCell.Centre}
                 );
+                /*
+                 * OH NOES ! I NEED 2 PASSES !
+                 * 1 - To create all templates without their SnapTargets
+                 * 2 - To Add their snap targets so they can reference any other templates
+                 */
                 Templates.Add(t);
+                t.AddSnapTarget(PosInCell.Centre, -1, 0, 0, GetTemplate("Foundation"), PosInCell.Centre);
+                t.AddSnapTarget(PosInCell.Centre, 1, 0, 0, GetTemplate("Foundation"), PosInCell.Centre);
+                t.AddSnapTarget(PosInCell.Centre, 0, 0, 1, GetTemplate("Foundation"), PosInCell.Centre);
+                t.AddSnapTarget(PosInCell.Centre, 0, 0, -1, GetTemplate("Foundation"), PosInCell.Centre);
                 initialised = true;
             }
         }

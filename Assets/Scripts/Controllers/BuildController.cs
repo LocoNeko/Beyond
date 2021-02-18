@@ -10,12 +10,7 @@ namespace Beyond
         public static float blueprintDistanceFromCamera = 5f;
         public static BuildController instance;
         public static int MaxDraggedObjects = 200;
-        public GameObject TestSphere;
-        /*
-        public GameObject SphereX;
-        public GameObject SphereY;
-        public GameObject SphereZ;
-        */
+        public List<GameObject> TestSpheres;
 
         [SerializeField] private GameObject FPSCharacter;
         [SerializeField] public GameObject ActiveBlueprint { get; protected set; }
@@ -28,6 +23,10 @@ namespace Beyond
         private List<GameObject> draggedObjects;
         [SerializeField] private Vector3Int positionInt_DragTo;
         [SerializeField] private Dictionary<string, Vector3> dragDirections;
+
+        // Snapping Stuff
+        [SerializeField] private static float SnapCheckFrequency = 0.1f;
+        private float timer;
 
         void Start()
         {
@@ -47,8 +46,15 @@ namespace Beyond
             // If we have an active blueprint, update its visuals (keep it horizontal, green/red based on whehter it can be placed, etc)
             else if (ActiveBlueprint != null)
             {
-                ActiveBlueprint.transform.localRotation = Quaternion.Inverse(FPSCharacter.transform.localRotation);
-                EffectManager.UpdateGhostVisuals(ActiveBlueprint);
+                timer += Time.deltaTime;
+                if (timer>=SnapCheckFrequency)
+                {
+                    timer = 0f;
+                    ActiveBlueprint.transform.localRotation = Quaternion.Inverse(FPSCharacter.transform.localRotation);
+                    EffectManager.UpdateGhostVisuals(ActiveBlueprint);
+                    GameObject ClosestSnapCandidate = SnapController.GetSnapCandidate(ActiveBlueprint);
+                    TestSpheres[0].transform.position = ((ClosestSnapCandidate != null) ? ClosestSnapCandidate.transform.position : Vector3.zero);
+                }
             }
         }
 
@@ -130,10 +136,12 @@ namespace Beyond
 
         public void StopDragging()
         {
+            List<GameObject> objectsPlaced = new List<GameObject>();
             GameObject FirstObject = Instantiate(GameObject_DragFrom);
             BeyondComponent BC_DragFrom = GameObject_DragFrom.GetComponent<BeyondComponent>();
             FirstObject.GetComponent<BeyondComponent>().CopyValues(BC_DragFrom);
             SetBlueprintFromGhost(FirstObject);
+            objectsPlaced.Add(FirstObject);
             Destroy(GameObject_DragFrom);
 
             foreach (GameObject go in draggedObjects)
@@ -145,17 +153,28 @@ namespace Beyond
                     BeyondComponent BC_ThisObject = go.GetComponent<BeyondComponent>();
                     ThisObject.GetComponent<BeyondComponent>().CopyValues(BC_ThisObject);
                     SetBlueprintFromGhost(ThisObject);
+                    objectsPlaced.Add(ThisObject);
                 }
                 Destroy(go);
             }
             draggedObjects.Clear();
             DestroyActiveBlueprint();
+
+            // Create BeyondGroup, add all objects to it
+            BeyondGroup bg = null;
+            foreach (GameObject go in objectsPlaced)
+            {
+                if (bg == null)
+                    bg = CreateNewBeyondGroup(go);
+                bg.AddObject(go);
+                // Only set the layer at the end, so objects don't collide into each other and fail the constraint check
+                go.layer = LayerMask.NameToLayer("Buildings");
+            }
         }
 
         void SetBlueprintFromGhost(GameObject go)
         {
             go.GetComponent<BoxCollider>().isTrigger = false;
-            go.layer = LayerMask.NameToLayer("Buildings");
             BeyondComponent bc = go.GetComponent<BeyondComponent>();
             go.name = bc.Template.Name;
             bc.SetState(State.Blueprint);
@@ -168,8 +187,6 @@ namespace Beyond
             Vector3 pos;
             if (Utility.LinePlaneIntersection(out pos, FPSCharacter.transform.position, FPSCharacter.transform.forward, Vector3.up, GameObject_DragFrom.transform.position))
             {
-                //TestSphere.transform.position = pos;
-                
                 // Find the corresponding position in units of 1
                 Vector3 Diff = pos - GameObject_DragFrom.transform.position; // the Vecotr3 difference between where we are dragging from and to
                 Vector3 DiffRotated = Utility.RotateAroundPoint(Diff, Vector3.zero , Quaternion.Inverse(GameObject_DragFrom.transform.rotation)); // Counter-rotate it to cancel the rotation of the object we're dragging
@@ -222,23 +239,28 @@ namespace Beyond
             if (ActiveBlueprint != null)
                 Destroy(ActiveBlueprint);
         }
-        public void CreateNewBeyondGroup(BeyondComponent bc, string name = null)
+
+        //TO DO : refactor that with love & care
+        public BeyondGroup CreateNewBeyondGroup(GameObject go, string name = null)
         {
+            // Auto give name
             if (name == null)
-            { // Auto give name
                 name = String.Format("Group {0:0000}", GameManager.instance.Place.BeyondGroups.Count);
-            }
+
+            BeyondComponent bc = go.GetComponent<BeyondComponent>();
             if (bc != null)
             {
                 // bc.transform.position - bc.template.pivotOffset : THIS IS ESSENTIAL - This allows us to properly set the pivot of the group 
-                BeyondGroup group = new BeyondGroup(name, bc.transform.position - bc.Template.PivotOffset, bc.transform.rotation);
-                group.AddBeyondComponent(bc , Vector3Int.zero);
+                BeyondGroup group = new BeyondGroup(name, bc.transform.position - bc.Template.CellCentre, bc.transform.rotation);
+                group.AddObject(go);
                 GameManager.instance.Place.BeyondGroups.Add(group);
+                return group;
             }
             else
             {
                 Debug.LogError("CreateNewBeyondGroup attempted to create an emtpy group");
             }
+            return null;
         }
 
     }

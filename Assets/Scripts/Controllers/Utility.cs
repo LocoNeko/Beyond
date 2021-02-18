@@ -1,8 +1,18 @@
+using System;
 using UnityEngine;
 using System.Collections.Generic;
 
 namespace Beyond
 {
+    [Serializable]
+    public class BeyondException : Exception
+    {
+        public BeyondException() { }
+
+        public BeyondException(string msg) : base("Beyond Exception: " + msg)
+        { }
+    }
+
     public static class Utility
     {
         public static Vector3 RotateAroundPoint(Vector3 p, Vector3 pivot, Quaternion r)
