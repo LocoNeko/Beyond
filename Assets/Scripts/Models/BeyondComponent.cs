@@ -29,6 +29,7 @@ namespace Beyond
         [SerializeField] public State State { get; protected set; }
         [SerializeField] public List<BuildingMaterial> BuildingMaterials { get; protected set; }
         [SerializeField] public PosInCell PosInCell { get; protected set; }
+        [SerializeField] public BeyondGroup Group { get; protected set; }
         [SerializeField] public Vector3Int GroupPosition { get; protected set; }
 
         [SerializeField] public string DEBUG_TemplateName;
@@ -75,8 +76,9 @@ namespace Beyond
             State = s;
         }
 
-        public void SetGroupPosition(Vector3Int pos)
+        public void SetGroupPosition(BeyondGroup bg , Vector3Int pos)
         {
+            Group = bg;
             GroupPosition = pos;
         }
 

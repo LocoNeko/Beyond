@@ -14,9 +14,9 @@ namespace Beyond
 
         // The cast box allows us to prevent the object from being inside terrain and is a good alternative to colliders
         public Vector3 CastBox { get; protected set; }
+        public List<PosInCell> ValidPosInCell { get; protected set; }
         //The CellCentre tells us where the cell's centre is compared to the object's centre
         public Vector3 CellCentre { get; protected set; }
-        public List<PosInCell> ValidPosInCell { get; protected set; }
         public List<SnapTarget> SnapTargets { get; protected set; }
         public List<string> Tags { get; protected set; }
 
@@ -57,6 +57,7 @@ namespace Beyond
             }
         }
 
+        // World space coordinates of this GameObject's CellCentre, based on its world space centre and its template
         public Vector3 GetCellCentre(GameObject go)
         {
             return go.transform.position + Utility.RotateAroundPoint(CellCentre, Vector3.zero, go.transform.rotation);

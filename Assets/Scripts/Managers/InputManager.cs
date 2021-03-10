@@ -37,13 +37,16 @@ namespace Beyond
             //Left click
             if (Input.GetMouseButtonDown(0))
             {
+                // TO DO : refactor and put the test inside StartDragging()
                 if (BuildController.instance.ActiveBlueprint!=null)
                     BuildController.instance.StartDragging();
             }
 
             if (Input.GetMouseButtonUp(0))
             {
-                BuildController.instance.StopDragging();
+                // TO DO : refactor and put the test inside StopDragging()
+                if (BuildController.instance.ActiveBlueprint != null)
+                    BuildController.instance.StopDragging();
                 //BuildController.instance.TryPlacingBlueprint();
             }
         }

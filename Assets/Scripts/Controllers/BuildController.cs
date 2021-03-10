@@ -11,6 +11,7 @@ namespace Beyond
         public static BuildController instance;
         public static int MaxDraggedObjects = 200;
         public List<GameObject> TestSpheres;
+        public GameObject TestSnap;
 
         [SerializeField] private GameObject FPSCharacter;
         [SerializeField] public GameObject ActiveBlueprint { get; protected set; }
@@ -27,6 +28,8 @@ namespace Beyond
 
         // Snapping Stuff
         [SerializeField] private static float SnapCheckFrequency = 0.1f;
+        [SerializeField] private GameObject SnappedToObject = null;
+        [SerializeField] private SnapTarget SnappedToTarget = null;
         private float timer;
 
         void Start()
@@ -38,30 +41,59 @@ namespace Beyond
 
         void Update()
         {
-            // We are dragging
-            if (GameObject_DragFrom != null)
-            {
+            if (GameObject_DragFrom != null) // We are dragging => show dragged objects
                 ShowDraggedObjects();
-            }
 
-            // If we have an active blueprint, update its visuals (keep it horizontal, green/red based on whehter it can be placed, etc)
             else if (ActiveBlueprint != null)
             {
-                timer += Time.deltaTime;
-                if (timer>=SnapCheckFrequency)
+                if (SnappedToObject == null)
                 {
-                    timer = 0f;
+                    // If we are not snapped and have an active blueprint, update its visuals (keep it horizontal, green/red based on whehter it can be placed, etc)
                     ActiveBlueprint.transform.localRotation = Quaternion.Inverse(FPSCharacter.transform.localRotation);
                     EffectManager.UpdateGhostVisuals(ActiveBlueprint);
 
-                    //DEBUG - in case I need to confirm the cell's centre
-                    //TestSpheres[0].transform.position = ActiveBlueprint.GetComponent<BeyondComponent>().Template.GetCellCentre(ActiveBlueprint);
-                    //DEBUG - All snap objects: SnapController.DebugSnap(TestSpheres, ActiveBlueprint);
-                    //DEBUG - All snap targets:
-                    SnapController.DebugSnapTargets(TestSpheres, ActiveBlueprint);
-                    //GameObject ClosestSnapCandidate = SnapController.GetSnapCandidate(ActiveBlueprint);
-                    //TestSpheres[0].transform.position = ((ClosestSnapCandidate != null) ? ClosestSnapCandidate.transform.position : Vector3.zero);
+                    // Attempt to snap this object to already placed objects (only happens every SnapCheckFrequency second)
+                    timer += Time.deltaTime;
+                    if (timer >= SnapCheckFrequency)
+                    {
+                        timer = 0f;
+                        TrySnapping();
+                    }
                 }
+                else
+                { // do this if we are snapped
+                    UpdateSnap();
+                }
+            }
+        }
+
+        void TrySnapping()
+        {
+            SnappedToObject = SnapController.SnapToObject(ActiveBlueprint, out SnappedToTarget);
+            if (SnappedToObject!=null)
+            {
+                ActiveBlueprint.transform.SetParent(null);
+                ActiveBlueprint.transform.rotation = SnappedToObject.transform.rotation;
+                ActiveBlueprint.transform.position = ActiveBlueprint.transform.position + SnappedToObject.transform.position - SnappedToTarget.GetToCentre(ActiveBlueprint);
+                // This works:
+                //TestSpheres[0].transform.position = candidate.transform.position;
+                //TestSpheres[1].transform.position = stOut.GetToCentre(ActiveBlueprint);
+
+            }
+        }
+
+        private void UpdateSnap()
+        {
+            // If we are too far from the snapping position, unsnap
+            Vector3 WouldBePos = FPSCharacter.transform.position + blueprintDistanceFromCamera * FPSCharacter.transform.forward;
+            float distance = Vector3.Distance(ActiveBlueprint.transform.position, WouldBePos) ;
+            if (distance>1f)
+            {
+                ActiveBlueprint.transform.SetParent(FPSCharacter.transform);
+                ActiveBlueprint.transform.position = WouldBePos;
+                SnappedToObject = null;
+                SnappedToTarget = null;
+                Debug.Log("We are currently at this distance from where we're looking: " + distance);
             }
         }
 

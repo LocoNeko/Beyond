@@ -51,12 +51,10 @@ namespace Beyond
             Vector3Int groupPosition = Vector3Int.RoundToInt(Utility.RotateAroundPoint(go.transform.position - Position, Vector3.zero, Rotation));
 
             //TO DO : check if this position is already occupied, which is tricky since some objects (like walls or cables) can co-exist in the same cell
-            bc.SetGroupPosition(groupPosition);
+            bc.SetGroupPosition(this , groupPosition);
             go.transform.SetParent(GroupObject.transform);
             ComponentList.Add(bc);
         }
-
-
 
         public List<BeyondComponent> BeyondComponentsAt(Vector3Int p)
         {

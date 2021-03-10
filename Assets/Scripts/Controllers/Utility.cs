@@ -17,7 +17,9 @@ namespace Beyond
     {
         public static Vector3 RotateAroundPoint(Vector3 p, Vector3 pivot, Quaternion r)
         {
-            return r * (p - pivot) + pivot;
+            Vector3 result = r * (p - pivot) + pivot;
+            //Debug.Log(string.Format("RotateAroundPoint {0} changed to {1}",p, result));
+            return result;
         }
 
         // Rotates the 3 unit axes (right,up,forward) by rotation r around origin

@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -38,8 +39,10 @@ namespace Beyond
         // World coordinates of the centre for this SnapTarget
         public Vector3 GetToCentre(GameObject go)
         {
-            BeyondComponent bc = go.GetComponent<BeyondComponent>();
-            return bc.Template.GetCellCentre(go) + Utility.RotateAroundPoint(ToCentre, Vector3.zero, go.transform.rotation);
+            Vector3 result = go.GetComponent<BeyondComponent>().Template.GetCellCentre(go) + 
+                    Utility.RotateAroundPoint(ToCentre, Vector3.zero, go.transform.rotation);
+            return result;
         }
+
     }
 }
